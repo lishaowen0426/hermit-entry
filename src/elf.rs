@@ -98,6 +98,10 @@ impl<'a> KernelObject<'a> {
     /// Parses raw bytes of an ELF file into a loadable kernel object.
     pub fn parse(elf: &[u8]) -> Result<KernelObject<'_>, ParseKernelError> {
         {
+            let kernel_addr = elf.as_ptr();
+            info!("qemu loads kernel at 0x{:p}", kernel_addr)
+        }
+        {
             let range = elf.as_ptr_range();
             let len = elf.len();
             info!("Parsing kernel from ELF at {range:?} (len = {len:#x} B / {len} B)");
@@ -271,6 +275,8 @@ impl<'a> KernelObject<'a> {
             memory.as_ptr_range(),
             len = memory.len()
         );
+
+        info!("start_addr: 0x{:x}", start_addr);
 
         if !self.is_relocatable() {
             assert_eq!(self.start_addr().unwrap(), start_addr);
